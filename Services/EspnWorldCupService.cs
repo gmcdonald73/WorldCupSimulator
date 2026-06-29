@@ -248,6 +248,7 @@ namespace WorldCup.Services
                 "STATUS_FIRST_HALF" => MatchStatus.InProgress,
                 "STATUS_HALFTIME" => MatchStatus.InProgress,
                 "STATUS_SECOND_HALF" => MatchStatus.InProgress,
+                "STATUS_OVERTIME" => MatchStatus.InProgress,
                 "STATUS_EXTRA_TIME" => MatchStatus.InProgress,
                 "STATUS_PENALTY_SHOOTOUT" => MatchStatus.InProgress,
 
