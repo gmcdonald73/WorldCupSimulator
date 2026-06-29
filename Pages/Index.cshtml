@@ -1,0 +1,211 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="text-center container pt-4">
+
+    <div class="container pt-4">
+        <div class="d-flex justify-content-center align-items-center gap-2">
+            <img src="/favicon.png" class="header-icon">
+            <h2 class="mb-0">World Cup Knockout Simulator</h2>
+            <img src="/favicon.png" class="header-icon">
+        </div>
+
+        <p class="sim-description mt-3">
+
+            Simulate the remainder of the World Cup knockout stage using a Monte Carlo model. For each simulated match, 
+            the competing teams' Elo ratings are used to estimate each team's probability of winning. 
+            The tournament is then simulated thousands of times to estimate each team's chances of reaching each round and winning the World Cup.
+
+            This is a simplified model and does not account for factors such as injuries, team selection, home advantage, 
+            tactical matchups, or changes in form. 
+            The results are intended for educational and entertainment purposes and should not be interpreted as predictions.
+        </p>
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        <label>Num Simulations (max 100,000):</label>
+
+        <input id="numSimulations"
+               type="number"
+               value="10000"
+               min="1"
+               max="100000"
+               style="width:120px;" />
+
+        <button id="calculateBtn"
+                class="btn btn-primary">
+            Run Simulations
+        </button>
+    </div>
+
+    <div id="loading" style="display:none;">
+        Running simulation...
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Team</th>
+                <th>Elo</th>
+                <th>R16</th>
+                <th>R16 %</th>
+                <th>QF</th>
+                <th>QF %</th>
+                <th>SF</th>
+                <th>SF %</th>
+                <th>Final</th>
+                <th>Final %</th>
+                <th>Wins</th>
+                <th>Win %</th>
+                <th>Win Odds</th>
+            </tr>
+        </thead>
+        <tbody id="resultsBody">
+        </tbody>
+    </table>
+
+    <h2>World Cup Matches</h2>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>MatchId</th>
+                <th>Stage</th>
+                <th>Date</th>
+                <th>Home Team</th>
+                <th>Away Team</th>
+                <th>Score</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var match in Model.Matches)
+            {
+                <tr>
+                    <td>@match.Key</td>
+                    <td>@match.Value.Stage</td>
+                    <td>@match.Value.MatchDate.ToString("dd MMM HH:mm")</td>
+                    <td>
+                        <img src="@match.Value.HomeTeamLogoUrl"
+                             width="24"
+                             height="24" />
+
+                        @match.Value.HomeTeamName
+                    </td>
+                    <td>
+                        <img src="@match.Value.AwayTeamLogoUrl"
+                             width="24"
+                             height="24" />
+
+                        @match.Value.AwayTeamName
+                    </td>
+                    <td>@match.Value.HomeGoals - @match.Value.AwayGoals</td>
+                    <td>@match.Value.Status</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script>
+
+    document
+    .getElementById("calculateBtn")
+    .addEventListener("click", async () => {
+
+        const button = document.getElementById("calculateBtn");
+        const loading = document.getElementById("loading");
+        const resultsBody = document.getElementById("resultsBody");
+
+        const simulations =
+            document.getElementById("numSimulations").value;
+
+        // UI feedback
+        button.disabled = true;
+        loading.style.display = "block";
+        resultsBody.innerHTML = "";
+
+        try {
+
+            const response = await fetch("/api/simulations/worldcup", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    numSimulations: parseInt(simulations)
+                })
+            });
+
+            const data = await response.json();
+
+            const entries = Object.entries(data);
+
+            // sort results
+            entries.sort((a, b) =>
+                b[1].wins  - a[1].wins  ||
+                b[1].final - a[1].final ||
+                b[1].sf    - a[1].sf    ||
+                b[1].qf    - a[1].qf    ||
+                b[1].r16   - a[1].r16
+            );
+
+            const totalSims = parseInt(simulations);
+
+            let html = "";
+            let rank = 1;
+
+            for (const [team, stats] of entries) {
+
+                const r16Pct = (stats.r16 / totalSims) * 100;
+                const qfPct = (stats.qf / totalSims) * 100;
+                const sfPct = (stats.sf / totalSims) * 100;
+                const finalPct = (stats.final / totalSims) * 100;
+                const winPct = (stats.wins / totalSims) * 100;
+                const winOdds =
+                  stats.wins > 0
+                    ? ((totalSims / stats.wins) - 1).toFixed(2)
+                    : "-";
+
+                html +=  `
+                    <tr>
+                        <td>${rank}</td>
+                        <td>
+                            <img src="${stats.logoUrl}"
+                             width="24"
+                             height="24" />
+
+                        ${stats.name}
+                        </td>
+                        <td>${stats.elo}</td>
+                        <td>${stats.r16}</td>
+                        <td>${r16Pct.toFixed(2)}%</td>
+                        <td>${stats.qf}</td>
+                        <td>${qfPct.toFixed(2)}%</td>
+                        <td>${stats.sf}</td>
+                        <td>${sfPct.toFixed(2)}%</td>
+                        <td>${stats.final}</td>
+                        <td>${finalPct.toFixed(2)}%</td>
+                        <td>${stats.wins}</td>
+                        <td>${winPct.toFixed(2)}%</td>
+                        <td>${winOdds}</td>
+                    </tr>
+                `;
+
+                rank++;
+            }
+
+            resultsBody.innerHTML = html;
+
+        } finally {
+            button.disabled = false;
+            loading.style.display = "none";
+        }
+    });
+
+</script>
