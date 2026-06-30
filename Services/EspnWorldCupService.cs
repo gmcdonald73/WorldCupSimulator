@@ -159,6 +159,14 @@ namespace WorldCup.Services
                 var venue = competitions.GetProperty("venue");
                 var stadium = venue.GetProperty("fullName").GetString();
 
+                string ResultNote = "";
+
+                if (competitions.TryGetProperty("notes", out var notes) &&
+                    notes.GetArrayLength() > 0)
+                {
+                    ResultNote = notes[0].GetProperty("headline").GetString();
+                }
+
                 var competitors = competitions.GetProperty("competitors");
 
                 var home = competitors[0];
@@ -228,6 +236,7 @@ namespace WorldCup.Services
                             }
 
                             match.Winner = winnerCode;
+                            match.ResultNote = ResultNote;
                         }
 
                         _teamInfoService.Add(homeTeamCode, homeTeamName, homeTeamLogoUrl);
@@ -250,6 +259,8 @@ namespace WorldCup.Services
                 "STATUS_SECOND_HALF" => MatchStatus.InProgress,
                 "STATUS_OVERTIME" => MatchStatus.InProgress,
                 "STATUS_EXTRA_TIME" => MatchStatus.InProgress,
+                "STATUS_END_OF_EXTRATIME" => MatchStatus.InProgress,
+                "STATUS_SHOOTOUT" => MatchStatus.InProgress,
                 "STATUS_PENALTY_SHOOTOUT" => MatchStatus.InProgress,
 
                 "STATUS_FINAL" => MatchStatus.Completed,
@@ -265,7 +276,7 @@ namespace WorldCup.Services
                 "STATUS_CANCELLED" => MatchStatus.Cancelled,
                 "STATUS_ABANDONED" => MatchStatus.Cancelled,
 
-                _ => MatchStatus.Unknown
+                _ => MatchStatus.InProgress  // If status not recognised, assume InProgress
             };
         }
 

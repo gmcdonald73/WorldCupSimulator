@@ -55,6 +55,8 @@
         public int AwayTeamFromMatchId { get; set; } // get AwayTeam from winner of this match
         public string Winner {  get; set; }
 
+        public string? ResultNote { get; set; }
+
         public string Loser =>
             Winner == HomeTeamCode ? AwayTeamCode : HomeTeamCode;
 
