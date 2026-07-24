@@ -14,9 +14,14 @@ namespace WorldCup.Services
 
         public Dictionary<string, TeamStats> Run(
             SortedDictionary<int,MatchResult> matches,
-            int simulations)
+            int simulations, int rewindToMatchId)
         {
             var simStats = new SimulationStats();
+
+            foreach (var match in matches.Where(m => m.Key >= rewindToMatchId))
+            {
+                match.Value.Status = MatchStatus.Scheduled;
+            }
 
             for (int i = 0; i < simulations; i++)
             {

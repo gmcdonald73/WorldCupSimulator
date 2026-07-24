@@ -37,6 +37,7 @@ async (
     TeamInfoService teamInfoService) =>
 {
     int numSims = request.NumSimulations;
+    int rewindToMatchId = request.RewindToMatchId;
 
     if(numSims < 1) numSims = 1;
     if (numSims > 100_000) numSims = 100_000;
@@ -45,7 +46,8 @@ async (
 
     var result = simulator.Run(
         matches,
-        numSims);
+        numSims,
+        rewindToMatchId);
 
     foreach (var team in result.Values)
     {

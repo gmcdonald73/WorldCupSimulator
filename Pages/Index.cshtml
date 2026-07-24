@@ -41,6 +41,15 @@
                max="100000"
                style="width:120px;" />
 
+        <label>Rewind to match Id:</label>
+
+        <input id="rewindToMatchId"
+               type="number"
+               value="105"
+               min="73"
+               max="105"
+               style="width:120px;" />
+
         <button id="calculateBtn"
                 class="btn btn-primary">
             Run Simulations
@@ -133,6 +142,9 @@
         const simulations =
             document.getElementById("numSimulations").value;
 
+        const rewindToMatchId =
+            document.getElementById("rewindToMatchId").value;
+
         // UI feedback
         button.disabled = true;
         loading.style.display = "block";
@@ -146,7 +158,8 @@
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    numSimulations: parseInt(simulations)
+                    numSimulations: parseInt(simulations),
+                    rewindToMatchId: parseInt(rewindToMatchId)
                 })
             });
 
@@ -160,7 +173,8 @@
                 b[1].final - a[1].final ||
                 b[1].sf    - a[1].sf    ||
                 b[1].qf    - a[1].qf    ||
-                b[1].r16   - a[1].r16
+                b[1].r16   - a[1].r16   ||
+                b[1].elo   - a[1].elo
             );
 
             const totalSims = parseInt(simulations);
