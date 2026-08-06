@@ -11,11 +11,13 @@ namespace WorldCup.Services
     {
         private readonly HttpClient _http;
         private readonly TeamInfoService _teamInfoService;
+        private readonly IWebHostEnvironment _environment;
 
-        public EspnWorldCupService(HttpClient http, TeamInfoService teamInfoService)
+        public EspnWorldCupService(HttpClient http, TeamInfoService teamInfoService, IWebHostEnvironment environment)
         {
             _http = http;
             _teamInfoService = teamInfoService;
+            _environment = environment;
         }
 
         public async Task<SortedDictionary<int, MatchResult>> GetMatches()
@@ -135,12 +137,30 @@ namespace WorldCup.Services
                 espnIdToMatchIdMap[x.Item1] = x.Item2;
             }
 
-            var url =
-                $"https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard" +
-                "?dates=20260628-20260731" +
-                $"&_={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
+            /*
+                        var url =
+                            $"https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard" +
+                            "?dates=20260628-20260731" +
+                            $"&_={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
 
-            var json = await _http.GetStringAsync(url);
+                        var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+                        var response = await _http.SendAsync(request);
+
+                        Console.WriteLine(response.StatusCode);
+
+                        var body = await response.Content.ReadAsStringAsync();
+
+                        Console.WriteLine(body);
+
+                        var json = await _http.GetStringAsync(url);
+            */
+
+            var path = Path.Combine(_environment.ContentRootPath,
+                                    "Data",
+                                    "scoreboard.json");
+
+            var json = await File.ReadAllTextAsync(path);
 
             using var doc = JsonDocument.Parse(json);
 
