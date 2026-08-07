@@ -5,16 +5,14 @@ A Monte Carlo simulation engine for the FIFA World Cup knockout stage built with
 🌐 **Try the simulator online:**
 **https://worldcupsimulator-gmcdonald-ejagawaya7brgcc5.australiaeast-01.azurewebsites.net/**
 
-## Screenshot
-
-![World Cup Knockout Simulator](docs/images/worldcupsimulator.png)
+![World Cup Knockout Simulator](docs/images/WorldCupSimulator.png)
 
 The simulator uses the current tournament results together with **Elo ratings** to estimate each team's probability of progressing through the knockout rounds and ultimately winning the World Cup.
 
 ## Features
 
 * 🏆 Simulates the entire World Cup knockout tournament
-* 🎲 Runs up to one hundred thousand of Monte Carlo simulations
+* 🎲 Runs up to one hundred thousand Monte Carlo simulations
 * 📊 Calculates the probability of each team reaching:
 
   * Round of 16
@@ -23,10 +21,11 @@ The simulator uses the current tournament results together with **Elo ratings** 
   * Final
   * Winning the World Cup
 * ⚽ Uses Elo ratings to determine match win probabilities
-* 🌍 Retrieves the latest fixtures and results from the ESPN World Cup API
+* 🌍 Retrieves the latest fixtures and results from the ESPN World Cup API*
 * 🖼️ Displays team names and national flags
 * 📈 Shows both raw simulation counts and percentages
 * 🚀 Hosted on Microsoft Azure
+
 
 ### Tournament Rewind
 
@@ -98,7 +97,15 @@ The simulator keeps track of:
 
 ## Data Source
 
-Match fixtures and results are obtained from the ESPN World Cup API.
+The simulator uses match data from ESPN's World Cup scoreboard API.
+
+During the 2026 tournament, live match data was retrieved from the ESPN API. 
+Following the conclusion of the tournament, the final match data has been
+captured and stored locally with the application.
+
+Using a static snapshot ensures that the simulator remains functional even
+if the ESPN API changes or becomes unavailable.
+
 
 ## Running Locally
 
